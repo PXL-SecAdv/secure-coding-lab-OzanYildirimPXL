@@ -5,21 +5,23 @@ const cors = require('cors'); // Import the cors middleware
 const app = express();
 const port = 3000;
 
-const pool = new pg.Pool({
-    user: 'secadv',
-    host: 'db',
-    database: 'pxldb',
-    password: 'ilovesecurity',
-    port: 5432,
-    connectionTimeoutMillis: 5000
-});
-
 // Configure CORS to allow requests only from http://localhost:8080
 const corsOptions = {
     origin: 'http://localhost:8080',
 };
 
 app.use(cors(corsOptions));
+app.use(bodyParser.json());
+
+// Database configuration using environment variables
+const pool = new pg.Pool({
+    user: process.env.DB_USER,
+    host: 'db',
+    database: 'pxldb',
+    password: process.env.DB_PASSWORD,
+    port: 5432,
+    connectionTimeoutMillis: 5000
+});
 
 // Your existing authentication logic
 app.post('/authenticate', async (request, response) => {
