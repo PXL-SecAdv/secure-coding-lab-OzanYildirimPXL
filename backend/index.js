@@ -1,9 +1,8 @@
 const pg = require('pg');
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors'); // Import the cors middleware
 const app = express();
-const cors = require('cors');
-
 const port = 3000;
 
 const pool = new pg.Pool({
@@ -15,16 +14,14 @@ const pool = new pg.Pool({
     connectionTimeoutMillis: 5000
 });
 
-console.log("Connecting...:");
+// Configure CORS to allow requests only from http://localhost:8080
+const corsOptions = {
+    origin: 'http://localhost:8080',
+};
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(
-    bodyParser.urlencoded({
-        extended: true,
-    })
-);
+app.use(cors(corsOptions));
 
+// Your existing authentication logic
 app.post('/authenticate', async (request, response) => {
     const { username, password } = request.body;
 
@@ -51,7 +48,7 @@ app.post('/authenticate', async (request, response) => {
     });
 });
 
-// Vergelijk het ingevoerde wachtwoord met het gehashte wachtwoord in de database
+// Compare the entered password with the hashed password in the database
 const comparePassword = async (password, hashedPassword) => {
     return pool.query('SELECT $1 = $2 AS match', [hashedPassword, crypt(password, hashedPassword)])
         .then(result => result.rows[0].match);
